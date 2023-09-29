@@ -5,6 +5,27 @@ import phoneBookService from './services/persons'
 //import viteLogo from '/vite.svg'
 //import './App.css'
 
+const Notification = ({message}) => {
+    if(message == null){
+        return null
+    }
+
+    const notificationStyle = {
+            color: 'green',
+            background: 'lightgrey',
+            fontSize: 20,
+            borderStyle: 'solid',
+            borderRadius: 5,
+            padding: 10,
+            marginBottom: 10
+    }
+    return (
+        <div style = {notificationStyle} >
+            {message}
+        </div>
+    )
+}
+
 const Persons = ({person, clickToDelete}) => {
     return (
         <li>
@@ -49,6 +70,7 @@ function App() {
 
   const [newPerson, setNewPerson] = useState('')
   const [newPhoneNo, setNewPhoneNo] = useState('')
+  const [message, setMessage] = useState('start message....')
 
   const addPerson = (event) => {
     event.preventDefault()
@@ -68,6 +90,7 @@ function App() {
                 .then(serverResponse => {
                     console.log(serverResponse)
                     setPersons(persons.concat(serverResponse))
+                    setMessage(`Added ${newPerson}`)
                 })
             } else {
                 if(window.confirm(`${personToCheck.name} is already in phonebook, replace old number with new one`)) {
@@ -75,11 +98,19 @@ function App() {
                     .then(serverResponse => {
                         console.log(serverResponse)
                         setPersons(persons.map(person => (person.id!=personToCheck.id) ? person : serverResponse))
+                        setMessage(`Updated ${newPerson}`)
+                    })
+                    .catch((error) => {
+                        setMessage(`Information of ${newPerson} is already removed from server`)
+                        setPersons(persons.filter(person => person.id!=personToCheck.id))
                     })
                 } else {
                     console.log(`cancel update for ${personToCheck.name}`)
                 }
             }
+            setTimeout(() => {
+                setMessage(null)
+            },5000)
         } else {
             alert(`Enter valid Phone Number of 10 digits`)
         }
@@ -109,6 +140,7 @@ function App() {
   return (
     <div>
         <h2>PhoneBook</h2>
+        <Notification message = {message} />
         <Filter persons = {persons} />
         <h2>add new person</h2>
         <form onSubmit = {addPerson}>
