@@ -33,7 +33,7 @@ const Persons = ({person, clickToDelete}) => {
                 {person.name}
                 <button onClick = {clickToDelete}>delete</button>
             </div>
-            <p>pno - {person.PhoneNo} </p>
+            <p>pno - {person.number} </p>
         </li>
     )
 }
@@ -55,13 +55,11 @@ const Filter = ({persons}) => {
         <p>search with name: <input value = {searchName} onChange = {(event) => setSearchName(event.target.value)} /></p>
         <h2>Search Result</h2>
         <ul>
-            {searchResults.map(person => <li key = {person.id}><div>{person.name}</div><p>pno - {person.PhoneNo}</p></li>)}
+            {searchResults.map(person => <li key = {person.id}><div>{person.name}</div><p>pno - {person.number}</p></li>)}
         </ul>
     </div>
     )
 }
-
-
 
 
 function App() {
@@ -74,9 +72,9 @@ function App() {
 
   const addPerson = (event) => {
     event.preventDefault()
-    const personObject = {
+    let personObject = {
         name: newPerson,
-        PhoneNo: newPhoneNo,
+        number: newPhoneNo,
     }
 
     if(newPerson.length <= 2){
@@ -94,7 +92,11 @@ function App() {
                 })
             } else {
                 if(window.confirm(`${personToCheck.name} is already in phonebook, replace old number with new one`)) {
-                    phoneBookService.update(personToCheck.id, personObject)
+                    personObject = {
+                        ...personObject,
+                        id:personToCheck.id
+                    }
+                    phoneBookService.update(personObject)
                     .then(serverResponse => {
                         console.log(serverResponse)
                         setPersons(persons.map(person => (person.id!=personToCheck.id) ? person : serverResponse))
